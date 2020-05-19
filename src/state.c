@@ -27,6 +27,24 @@ bool	state_init(State *state)
 	SDL_GL_GetDrawableSize(state->window, &state->width, &state->height);
 	GL_CALL(glViewport(0, 0, state->width, state->height));
 
+	float vertices[] = {
+		 1.0f,  1.0f,
+		 1.0f, -1.0f,
+		-1.0f,  1.0f,
+
+		 1.0f, -1.0f,
+		-1.0f, -1.0f,
+		-1.0f,  1.0f,
+	};
+	GL_CALL(glGenVertexArrays(1, &state->vertex_array));
+	GL_CALL(glBindVertexArray(state->vertex_array));
+
+	GL_CALL(glGenBuffers(1, &state->vertex_buf));
+	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, state->vertex_buf));
+	GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+	GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0));
+	GL_CALL(glEnableVertexAttribArray(0));
+
 	/* state->palette = color_palette_new(NULL, MANDEL_ITERATIONS); */
 	/* if (state->palette == NULL) */
 	/* 	return false; */
@@ -44,8 +62,13 @@ void	state_run(State *state)
     while (state->running)
     {
         event_handle(state);
-		glClearColor(0.2, 0.3, 0.2, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		GL_CALL(glClearColor(0.2, 0.3, 0.2, 1.0));
+		GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+
+		GL_CALL(glUseProgram(state->shader.id));
+		shader_set_uniforms(&state->shader, state);
+		GL_CALL(glBindVertexArray(state->vertex_array));
+		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 6));
 
 		SDL_GL_SwapWindow(state->window);
 		SDL_Delay(3);

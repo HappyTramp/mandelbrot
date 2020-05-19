@@ -51,7 +51,15 @@ typedef struct
 	unsigned int	id;
 	struct
 	{
-		int			iteration;
+		int			width;
+		int			height;
+
+		float		real_start;
+		float		real_end;
+		float		imag_start;
+		float		imag_end;
+
+		int			iterations;
 	}				location;
 }					Shader;
 
@@ -64,6 +72,7 @@ typedef struct
 	int				height;
 
 	unsigned int	vertex_buf;
+	unsigned int	vertex_array;
 	unsigned int	texture;
 
 	Shader			shader;
@@ -98,5 +107,6 @@ Color				*color_palette_new(Color *palette, int iterations);
 
 // shader.c
 bool				shader_init(Shader *shader);
+void				shader_set_uniforms(Shader *shader, State *state);
 
 #endif

@@ -24,7 +24,31 @@ bool				shader_init(Shader *shader)
 	GL_CALL(glValidateProgram(shader->id));
 	GL_CALL(glDeleteShader(shader_vert));
 	GL_CALL(glDeleteShader(shader_frag));
+
+	GL_CALL(shader->location.width = glGetUniformLocation(shader->id, "u_width"));
+	GL_CALL(shader->location.height = glGetUniformLocation(shader->id, "u_height"));
+
+	GL_CALL(shader->location.real_start = glGetUniformLocation(shader->id, "u_real_start"));
+	GL_CALL(shader->location.real_end = glGetUniformLocation(shader->id, "u_real_end"));
+	GL_CALL(shader->location.imag_start = glGetUniformLocation(shader->id, "u_imag_start"));
+	GL_CALL(shader->location.imag_end = glGetUniformLocation(shader->id, "u_imag_end"));
+
+	GL_CALL(shader->location.iterations = glGetUniformLocation(shader->id, "u_iterations"));
+
 	return (true);
+}
+
+void				shader_set_uniforms(Shader *shader, State *state)
+{
+	GL_CALL(glUniform1i(shader->location.width, state->width));
+	GL_CALL(glUniform1i(shader->location.height, state->height));
+
+	GL_CALL(glUniform1f(shader->location.real_start, state->real_start));
+	GL_CALL(glUniform1f(shader->location.real_end, state->real_end));
+	GL_CALL(glUniform1f(shader->location.imag_start, state->imag_start));
+	GL_CALL(glUniform1f(shader->location.imag_end, state->imag_end));
+
+	GL_CALL(glUniform1i(shader->location.iterations, state->iterations));
 }
 
 static unsigned int	st_compile(char *filepath, unsigned int type)

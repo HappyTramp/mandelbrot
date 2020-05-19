@@ -108,7 +108,7 @@ static void	st_move_horizontal(State *state, bool move_right)
 
 static void	st_move_vertical(State *state, bool move_down)
 {
-	double factor = move_down ? 1 : -1;
+	double factor = move_down ? -1 : 1;
 	double imag_change = (state->imag_end - state->imag_start) / MANDEL_MOVE_RATIO;
 	state->imag_start += factor * imag_change;
 	state->imag_end += factor * imag_change;
