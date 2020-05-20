@@ -22,6 +22,20 @@
 	error_check_gl(#x, __FILE__, __LINE__); \
 } while (0)
 
+enum
+{
+	KEY_UP = 0,
+	KEY_DOWN,
+	KEY_RIGHT,
+	KEY_LEFT,
+
+	KEY_INC_ITERATIONS,
+	KEY_DEC_ITERATIONS,
+
+	KEY_ZOOM_IN,
+	KEY_ZOOM_OUT,
+};
+
 typedef struct
 {
 	uint8_t 	r;
