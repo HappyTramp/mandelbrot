@@ -55,6 +55,8 @@ bool	state_init(State *state)
 	state->imag_start = -2.0;
 	state->imag_end = 2.0;
     state->running = true;
+	state->smooth = false;
+	state->samples = 1.0;
     return true;
 }
 

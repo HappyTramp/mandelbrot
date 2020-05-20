@@ -30,6 +30,8 @@ bool				shader_init(Shader *shader)
 		|| (shader->location.imag_start = st_get_location(shader->id, "u_imag_start")) == -1
 		|| (shader->location.imag_end = st_get_location(shader->id, "u_imag_end")) == -1
 		|| (shader->location.iterations = st_get_location(shader->id, "u_iterations")) == -1
+		|| (shader->location.smooth = st_get_location(shader->id, "u_smooth")) == -1
+		|| (shader->location.samples = st_get_location(shader->id, "u_samples")) == -1
 		|| (shader->location.texture = st_get_location(shader->id, "u_texture")) == -1)
 		return false;
 	return true;
@@ -54,6 +56,10 @@ void				shader_set_uniforms(Shader *shader, State *state)
 	GL_CALL(glUniform1f(shader->location.imag_end, state->imag_end));
 
 	GL_CALL(glUniform1i(shader->location.iterations, state->iterations));
+
+	GL_CALL(glUniform1i(shader->location.smooth, state->smooth));
+
+	GL_CALL(glUniform1f(shader->location.samples, state->samples));
 
 	GL_CALL(glUniform1i(shader->location.texture, 0));
 	GL_CALL(glActiveTexture(GL_TEXTURE0));

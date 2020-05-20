@@ -8,15 +8,15 @@ static void	st_set_key(SDL_Keycode sym, bool value);
 static void	st_apply_keys(State *state);
 
 static bool	g_key_states[] = {
-	[KEY_UP] = false,
-	[KEY_DOWN] = false,
+	[KEY_UP]    = false,
+	[KEY_DOWN]  = false,
 	[KEY_RIGHT] = false,
-	[KEY_LEFT] = false,
+	[KEY_LEFT]  = false,
 
 	[KEY_INC_ITERATIONS] = false,
 	[KEY_DEC_ITERATIONS] = false,
 
-	[KEY_ZOOM_IN] = false,
+	[KEY_ZOOM_IN]  = false,
 	[KEY_ZOOM_OUT] = false,
 };
 
@@ -33,7 +33,18 @@ void 		event_handle(State *state)
                 break;
 
             case SDL_KEYDOWN:
-				st_set_key(e.key.keysym.sym, true);
+				if (e.key.keysym.sym == SDLK_s)
+					state->smooth = !state->smooth;
+				else if (e.key.keysym.sym == SDLK_w)
+					state->samples += 1.0;
+				else if (e.key.keysym.sym == SDLK_q)
+				{
+					state->samples -= 1.0;
+					if (state->samples <= 0.0)
+						state->samples  = 1.0;
+				}
+				else
+					st_set_key(e.key.keysym.sym, true);
                 break;
 
             case SDL_KEYUP:

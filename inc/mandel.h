@@ -69,6 +69,8 @@ typedef struct
 		int			imag_end;
 		int			iterations;
 		int			texture;
+		int			smooth;
+		int			samples;
 	}				location;
 }					Shader;
 
@@ -93,6 +95,8 @@ typedef struct
 	double			imag_start;
 	double			imag_end;
 	int				iterations;
+	bool			smooth;
+	float			samples;
 }					State;
 
 // mandelbrot.c
