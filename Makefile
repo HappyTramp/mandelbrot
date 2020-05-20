@@ -7,7 +7,7 @@ INC_DIR = inc
 OBJ_DIR = obj
 
 CC = gcc
-OFLAG = -O0 #-Ofast -funroll-loops -ffast-math
+OFLAG = -O3
 CCFLAGS = -I$(INC_DIR) -Wall -Wextra -Wpedantic $(OFLAG) \
 		  $(shell pkg-config --cflags sdl2 glew)
 LDFLAGS = $(shell pkg-config --libs sdl2 glew)

@@ -4,17 +4,15 @@
 #define MANDEL_SHADER_FRAG_FILE "shader/fragment.glsl"
 
 static unsigned int	st_compile(char *filepath, unsigned int type);
+static int			st_get_location(unsigned int shader_id, const char *name);
 
 bool				shader_init(Shader *shader)
 {
 	unsigned int	shader_vert;
 	unsigned int	shader_frag;
 
-	shader_vert = st_compile(MANDEL_SHADER_VERT_FILE, GL_VERTEX_SHADER);
-	if (shader_vert == 0)
-		return false;
-	shader_frag = st_compile(MANDEL_SHADER_FRAG_FILE, GL_FRAGMENT_SHADER);
-	if (shader_frag == 0)
+	if ((shader_vert = st_compile(MANDEL_SHADER_VERT_FILE, GL_VERTEX_SHADER)) == 0
+		|| (shader_frag = st_compile(MANDEL_SHADER_FRAG_FILE, GL_FRAGMENT_SHADER)) == 0)
 		return false;
 
 	GL_CALL(shader->id = glCreateProgram());
@@ -25,17 +23,24 @@ bool				shader_init(Shader *shader)
 	GL_CALL(glDeleteShader(shader_vert));
 	GL_CALL(glDeleteShader(shader_frag));
 
-	GL_CALL(shader->location.width = glGetUniformLocation(shader->id, "u_width"));
-	GL_CALL(shader->location.height = glGetUniformLocation(shader->id, "u_height"));
+	if ((shader->location.width = st_get_location(shader->id, "u_width")) == -1
+		|| (shader->location.height = st_get_location(shader->id, "u_height")) == -1
+		|| (shader->location.real_start = st_get_location(shader->id, "u_real_start")) == -1
+		|| (shader->location.real_end = st_get_location(shader->id, "u_real_end")) == -1
+		|| (shader->location.imag_start = st_get_location(shader->id, "u_imag_start")) == -1
+		|| (shader->location.imag_end = st_get_location(shader->id, "u_imag_end")) == -1
+		|| (shader->location.iterations = st_get_location(shader->id, "u_iterations")) == -1
+		|| (shader->location.texture = st_get_location(shader->id, "u_texture")) == -1)
+		return false;
+	return true;
+}
 
-	GL_CALL(shader->location.real_start = glGetUniformLocation(shader->id, "u_real_start"));
-	GL_CALL(shader->location.real_end = glGetUniformLocation(shader->id, "u_real_end"));
-	GL_CALL(shader->location.imag_start = glGetUniformLocation(shader->id, "u_imag_start"));
-	GL_CALL(shader->location.imag_end = glGetUniformLocation(shader->id, "u_imag_end"));
+static int			st_get_location(unsigned int shader_id, const char *name)
+{
+	int	location;
 
-	GL_CALL(shader->location.iterations = glGetUniformLocation(shader->id, "u_iterations"));
-
-	return (true);
+	GL_CALL(location = glGetUniformLocation(shader_id, name));
+	return location;
 }
 
 void				shader_set_uniforms(Shader *shader, State *state)
@@ -49,6 +54,10 @@ void				shader_set_uniforms(Shader *shader, State *state)
 	GL_CALL(glUniform1f(shader->location.imag_end, state->imag_end));
 
 	GL_CALL(glUniform1i(shader->location.iterations, state->iterations));
+
+	GL_CALL(glUniform1i(shader->location.texture, 0));
+	GL_CALL(glActiveTexture(GL_TEXTURE0));
+	GL_CALL(glBindTexture(GL_TEXTURE_1D, state->texture));
 }
 
 static unsigned int	st_compile(char *filepath, unsigned int type)

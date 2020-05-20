@@ -24,6 +24,7 @@ bool	state_init(State *state)
 		perror(NULL);
 		return false;
 	}
+
 	SDL_GL_GetDrawableSize(state->window, &state->width, &state->height);
 	GL_CALL(glViewport(0, 0, state->width, state->height));
 
@@ -45,10 +46,10 @@ bool	state_init(State *state)
 	GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0));
 	GL_CALL(glEnableVertexAttribArray(0));
 
-	/* state->palette = color_palette_new(NULL, MANDEL_ITERATIONS); */
-	/* if (state->palette == NULL) */
-	/* 	return false; */
 	state->iterations = MANDEL_ITERATIONS;
+	state->texture = color_texture_new(1024);
+	if (state->texture == 0)
+		return false;
 	state->real_start = -2.0;
 	state->real_end = 2.0;
 	state->imag_start = -2.0;
@@ -77,7 +78,9 @@ void	state_run(State *state)
 
 void	state_quit(State *state)
 {
-    /* free(state->palette); */
+	GL_CALL(glDeleteTextures(1, &state->texture));
+	GL_CALL(glDeleteBuffers(1, &state->vertex_buf));
+	GL_CALL(glDeleteVertexArrays(1, &state->vertex_array));
 	GL_CALL(glDeleteProgram(state->shader.id));
 	SDL_GL_DeleteContext(state->context);
     SDL_DestroyWindow(state->window);

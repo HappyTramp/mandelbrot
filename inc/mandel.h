@@ -22,15 +22,11 @@
 	error_check_gl(#x, __FILE__, __LINE__); \
 } while (0)
 
-typedef union
+typedef struct
 {
-    uint32_t		data;
-    struct
-    {
-        uint8_t 	b;
-        uint8_t 	g;
-        uint8_t 	r;
-    };
+	uint8_t 	r;
+	uint8_t 	b;
+	uint8_t 	g;
 }					Color;
 
 typedef struct
@@ -53,13 +49,12 @@ typedef struct
 	{
 		int			width;
 		int			height;
-
-		float		real_start;
-		float		real_end;
-		float		imag_start;
-		float		imag_end;
-
+		int			real_start;
+		int			real_end;
+		int			imag_start;
+		int			imag_end;
 		int			iterations;
+		int			texture;
 	}				location;
 }					Shader;
 
@@ -103,7 +98,7 @@ void				error_clear_gl(void);
 void				error_check_gl(const char *code, const char *filename, int line_num);
 
 // color.c
-Color				*color_palette_new(Color *palette, int iterations);
+unsigned int		color_texture_new(int iterations);
 
 // shader.c
 bool				shader_init(Shader *shader);

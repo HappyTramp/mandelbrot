@@ -5,22 +5,36 @@
 
 static Color	color_hsl_to_rgb(ColorHSL color_hsl);
 
-Color	*color_palette_new(Color *palette, int iterations)
+unsigned int	color_texture_new(int count)
 {
-	ColorHSL	hsl;
+	ColorHSL		hsl;
+	Color			*palette;
+	unsigned int	texture;
 
-    palette = realloc(palette, sizeof(Color) * (iterations + 1));
+    palette = malloc(sizeof(Color) * count);
 	if (palette == NULL)
-		return NULL;
-    for (int i = 0; i < iterations; i++)
+		return 0;
+    for (int i = 0; i < count; i++)
     {
-		hsl.h = (int)(255.0 * ((double)i / (double)iterations));
+		hsl.h = (uint8_t)(255.0 * ((double)i / (double)count));
 		hsl.s = 150;
 		hsl.l = 127;
 		palette[i] = color_hsl_to_rgb(hsl);
     }
-    palette[iterations].data = 0x0;
-    return palette;
+    for (int i = 0, j = count - 1; i < j; i++, j--)
+	{
+		Color tmp = palette[i];
+		palette[i] = palette[j];
+		palette[j] = tmp;
+	}
+
+	GL_CALL(glGenTextures(1, &texture));
+	GL_CALL(glBindTexture(GL_TEXTURE_1D, texture));
+	GL_CALL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	GL_CALL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	GL_CALL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, count + 1, 0, GL_RGB, GL_UNSIGNED_BYTE, palette));
+	free(palette);
+	return texture;
 }
 
 static Color	color_hsl_to_rgb(ColorHSL color_hsl)

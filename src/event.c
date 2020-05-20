@@ -21,13 +21,13 @@ void 		event_handle(State *state)
                 {
 					case SDLK_r:
 						state->iterations += 10;
-						/* state->palette = color_palette_new(state->palette, state->iterations); */
+						/* state->texture = color_texture_new( state->iterations); */
 						break;
 					case SDLK_e:
 						state->iterations -= 10;
 						if (state->iterations <= 0)
 							state->iterations = 1;
-						/* state->palette = color_palette_new(state->palette, state->iterations); */
+						/* state->texture = color_texture_new( state->iterations); */
 						break;
                     case SDLK_UP:
                     case SDLK_k:
@@ -68,15 +68,14 @@ void 		event_handle(State *state)
 			case SDL_WINDOWEVENT:
 				if (e.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
+					double w_ratio = (double)state->width / (double)e.window.data1;
+					double h_ratio = (double)state->height / (double)e.window.data2;
 					SDL_GL_GetDrawableSize(state->window, &state->width, &state->height);
 					GL_CALL(glViewport(0, 0, state->width, state->height));
-					/* double w_ratio = (double)width / (double)e.window.data1; */
-					/* double h_ratio = (double)height / (double)e.window.data2; */
-                    /*  */
-					/* state->real_start /= w_ratio; */
-					/* state->real_end /= w_ratio; */
-					/* state->imag_start /= h_ratio; */
-					/* state->imag_end /= h_ratio; */
+					state->real_start /= w_ratio;
+					state->real_end /= w_ratio;
+					state->imag_start /= h_ratio;
+					state->imag_end /= h_ratio;
 				}
 				break;
         }
