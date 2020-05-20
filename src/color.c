@@ -1,19 +1,95 @@
 #include "mandel.h"
+#include "config.h"
 
 #define MAX(x, y) (x > y ? x : y)
 #define MIN(x, y) (x < y ? x : y)
 
 static Color	color_hsl_to_rgb(ColorHSL color_hsl);
+static Color	*st_hsl_rainbow(int count);
+static int		st_compar_control_points(const void *ptr1, const void *ptr2);
+static Color	*st_linear_iterpolation(int count, ControlPoint *points, size_t points_count);
 
 unsigned int	color_texture_new(int count)
 {
+	unsigned int	texture;
+	Color			*palette;
+
+	if ((palette = st_hsl_rainbow(count)) == NULL)
+		return 0;
+	/* if ((palette = st_linear_iterpolation(count, g_theme, sizeof(g_theme) / sizeof(ControlPoint))) == NULL) */
+	/* 	return 0; */
+	GL_CALL(glGenTextures(1, &texture));
+	GL_CALL(glBindTexture(GL_TEXTURE_1D, texture));
+	GL_CALL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	GL_CALL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	GL_CALL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, count + 1, 0, GL_RGB, GL_UNSIGNED_BYTE, palette));
+	free(palette);
+	return texture;
+}
+
+static Color	*st_linear_iterpolation(int count, ControlPoint *points, size_t points_count)
+{
+	Color			*palette;
+
+	if (points_count < 2)
+		return NULL;
+    if ((palette = malloc(sizeof(Color) * count)) == NULL)
+		return NULL;
+	qsort(points, points_count, sizeof(ControlPoint), st_compar_control_points);
+
+	size_t	point_i = 0;
+
+	double	x0 = points[point_i].position;
+	double	x1 = points[point_i + 1].position;
+
+	double	y0 = points[point_i].color.r;
+	double	y1 = points[point_i + 1].color.r;
+
+	double	delta_x = x1 - x0;
+	double	delta_y = y1 - y0;
+
+	double	m = delta_x / delta_y;
+	double	b = y0 - x0;
+
+	double red = 0;
+	for (int i = 0; i < count; i++)
+	{
+		palette[i].r = (uint8_t)(255.0 * (m * red + b));
+		red += 1.0 / (double)count;
+		if (red >= x1)
+		{
+			if (point_i >= points_count)
+				break;
+			x0 = x1;
+			point_i++;
+			x1 = points[point_i + 1].position;
+		}
+		palette[i].g = 0;
+		palette[i].b = 0;
+		printf("%d\n", i);
+	}
+	return palette;
+}
+
+static int		st_compar_control_points(const void *ptr1, const void *ptr2)
+{
+	const ControlPoint	*point1 = ptr1;
+	const ControlPoint	*point2 = ptr2;
+
+	if (point1->position < point2->position)
+		return -1;
+	if (point1->position > point2->position)
+		return 1;
+	return 0;
+}
+
+static Color	*st_hsl_rainbow(int count)
+{
 	ColorHSL		hsl;
 	Color			*palette;
-	unsigned int	texture;
 
-    palette = malloc(sizeof(Color) * count);
-	if (palette == NULL)
-		return 0;
+    if ((palette = malloc(sizeof(Color) * count)) == NULL)
+		return NULL;
     for (int i = 0; i < count; i++)
     {
 		hsl.h = (uint8_t)(255.0 * ((double)i / (double)count));
@@ -27,14 +103,7 @@ unsigned int	color_texture_new(int count)
 		palette[i] = palette[j];
 		palette[j] = tmp;
 	}
-
-	GL_CALL(glGenTextures(1, &texture));
-	GL_CALL(glBindTexture(GL_TEXTURE_1D, texture));
-	GL_CALL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-	GL_CALL(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-	GL_CALL(glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, count + 1, 0, GL_RGB, GL_UNSIGNED_BYTE, palette));
-	free(palette);
-	return texture;
+	return palette;
 }
 
 static Color	color_hsl_to_rgb(ColorHSL color_hsl)

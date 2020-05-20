@@ -6,6 +6,7 @@ static void	st_move_horizontal(State *state, bool move_right);
 static void	st_move_vertical(State *state, bool move_down);
 static void	st_set_key(SDL_Keycode sym, bool value);
 static void	st_apply_keys(State *state);
+static void	st_resize(State *state, int new_width, int new_height);
 
 static bool	g_key_states[] = {
 	[KEY_UP]    = false,
@@ -60,20 +61,35 @@ void 		event_handle(State *state)
 
 			case SDL_WINDOWEVENT:
 				if (e.window.event == SDL_WINDOWEVENT_RESIZED)
-				{
-					double w_ratio = (double)state->width / (double)e.window.data1;
-					double h_ratio = (double)state->height / (double)e.window.data2;
-					SDL_GL_GetDrawableSize(state->window, &state->width, &state->height);
-					GL_CALL(glViewport(0, 0, state->width, state->height));
-					state->real_start /= w_ratio;
-					state->real_end /= w_ratio;
-					state->imag_start /= h_ratio;
-					state->imag_end /= h_ratio;
-				}
+					st_resize(state, e.window.data1, e.window.data2);
 				break;
         }
     }
 	st_apply_keys(state);
+}
+
+void		st_resize(State *state, int new_width, int new_height)
+{
+	double w_delta = ((double)new_width - (double)state->width) / 2.0;
+	double h_delta = ((double)new_height - (double)state->height) / 2.0;
+
+	double real_dist = state->real_end - state->real_start;
+	double imag_dist = state->imag_end - state->imag_start;
+
+	double width_real_ratio =  (double)state->width / real_dist;
+	double height_imag_ratio = (double)state->height / imag_dist;
+
+	w_delta /= width_real_ratio;
+	h_delta /= height_imag_ratio;
+
+	state->real_start -= w_delta;
+	state->real_end   += w_delta;
+
+	state->imag_start -= h_delta;
+	state->imag_end   += h_delta;
+
+	SDL_GL_GetDrawableSize(state->window, &state->width, &state->height);
+	GL_CALL(glViewport(0, 0, state->width, state->height));
 }
 
 static void	st_set_key(SDL_Keycode sym, bool value)

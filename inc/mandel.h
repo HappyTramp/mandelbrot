@@ -58,6 +58,12 @@ typedef struct
 
 typedef struct
 {
+	float	position;
+	Color	color;
+}			ControlPoint;
+
+typedef struct
+{
 	unsigned int	id;
 	struct
 	{
