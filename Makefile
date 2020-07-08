@@ -38,4 +38,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all debug clean fclean re
+windows:
+	gcc -O3 src\*.c -I inc -lSDL2 -lSDL2main -lglew32 -lopengl32
+
+.PHONY: all debug clean fclean re windows
